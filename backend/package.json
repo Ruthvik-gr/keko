@@ -1,0 +1,32 @@
+{
+  "name": "vet-chatbot-backend",
+  "version": "1.0.0",
+  "description": "Backend API for Veterinary Chatbot SDK",
+  "main": "src/server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node --import ./loadenv.js src/server.js",
+    "dev": "nodemon --import ./loadenv.js src/server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "chatbot",
+    "veterinary",
+    "gemini",
+    "ai"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@google/generative-ai": "^0.21.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.2",
+    "groq-sdk": "^0.37.0",
+    "mongoose": "^8.9.3",
+    "uuid": "^11.0.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  }
+}
