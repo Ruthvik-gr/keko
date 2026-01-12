@@ -108,5 +108,111 @@ With custom context:
 
 - **Backend**: Node.js, Express, MongoDB, Mongoose
 - **Frontend**: React, Vite, Tailwind CSS
-- **AI**: Google Gemini API
+- **AI**: Google Gemini API, Groq (Llama 3.3 70B)
 - **Demo**: React, React Router, Tailwind CSS
+
+## Architecture Overview
+
+```
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│   Demo App      │     │  Chat Widget    │     │  Any Website    │
+│   (React)       │     │  (React SDK)    │     │  (Embedded)     │
+└────────┬────────┘     └────────┬────────┘     └────────┬────────┘
+         │                       │                       │
+         └───────────────────────┼───────────────────────┘
+                                 │
+                                 ▼
+                    ┌─────────────────────────┐
+                    │   Backend API Server    │
+                    │   (Express.js)          │
+                    │                         │
+                    │  ┌───────────────────┐  │
+                    │  │   AI Service      │  │
+                    │  │  ┌─────────────┐  │  │
+                    │  │  │  Gemini API │──┼──┼──► Primary
+                    │  │  └─────────────┘  │  │
+                    │  │  ┌─────────────┐  │  │
+                    │  │  │  Groq API   │──┼──┼──► Fallback
+                    │  │  └─────────────┘  │  │
+                    │  └───────────────────┘  │
+                    └────────────┬────────────┘
+                                 │
+                                 ▼
+                    ┌─────────────────────────┐
+                    │       MongoDB           │
+                    │  (Sessions, Messages,   │
+                    │   Appointments)         │
+                    └─────────────────────────┘
+```
+
+### Components
+
+1. **Chat Widget SDK** - Embeddable React component that can be added to any website
+2. **Backend API** - Express.js server handling chat, sessions, and appointments
+3. **AI Service** - Multi-provider AI service with automatic fallback
+4. **Database** - MongoDB for persisting sessions, messages, and appointments
+5. **Demo App** - Sample React application demonstrating SDK integration
+
+## Key Decisions & Trade-offs
+
+### 1. Hardcoded User for Demo
+- **Decision**: User context (userId, userName, petName) is hardcoded in the demo for simplicity
+- **Trade-off**: In production, this should be dynamically passed from the host application's authentication system
+- **Location**: `frontend/src/main.jsx` contains the hardcoded config
+
+### 2. Multi-Provider AI with Fallback
+- **Decision**: Implemented Groq (Llama 3.3 70B) as a fallback when Gemini API fails
+- **Rationale**: Gemini free tier has strict rate limits (429 errors). Groq provides a generous free tier as backup
+- **Flow**: Gemini (gemini-2.0-flash → gemini-1.5-flash-latest → gemini-pro) → Groq
+- **Trade-off**: Slight latency increase on fallback, but ensures higher availability
+
+### 3. Session-based Architecture
+- **Decision**: Each chat session is stored with a unique sessionId
+- **Trade-off**: Requires cleanup strategy for old sessions, but enables conversation history and analytics
+
+### 4. IIFE Build for SDK
+- **Decision**: Built the chat widget as an IIFE (Immediately Invoked Function Expression)
+- **Rationale**: Easy embedding with a single script tag on any website
+- **Trade-off**: Larger bundle size vs modular imports, but simpler integration
+
+### 5. Intent Detection
+- **Decision**: AI-powered intent detection to distinguish between Q&A and appointment booking
+- **Trade-off**: Additional API call per message, but enables smarter routing
+
+## Assumptions
+
+> **Important: This is a Proof of Concept (POC) and is NOT production-ready.**
+
+### Current Limitations
+
+1. **No Authentication** - The SDK does not implement user authentication. User context is passed directly without verification.
+
+2. **No Rate Limiting** - The API does not implement rate limiting. Production deployment should add rate limiting middleware.
+
+3. **No Input Sanitization** - Basic validation exists, but comprehensive input sanitization for security is not implemented.
+
+4. **Single Database** - Uses a single MongoDB instance. Production should consider read replicas and sharding.
+
+5. **No Caching** - No Redis or caching layer. Frequent queries hit the database directly.
+
+6. **Environment Secrets** - API keys are stored in `.env` files. Production should use a secrets manager.
+
+7. **No HTTPS** - Development runs on HTTP. Production must use HTTPS.
+
+8. **No Monitoring** - No APM, logging aggregation, or alerting configured.
+
+### For Production Deployment
+
+Before deploying to production, consider:
+
+- [ ] Implement proper authentication (JWT, OAuth)
+- [ ] Add rate limiting (express-rate-limit)
+- [ ] Set up HTTPS with SSL certificates
+- [ ] Add comprehensive input validation and sanitization
+- [ ] Implement caching layer (Redis)
+- [ ] Set up monitoring and alerting (Datadog, New Relic)
+- [ ] Configure proper CORS policies
+- [ ] Add database indexing and optimization
+- [ ] Implement proper error tracking (Sentry)
+- [ ] Set up CI/CD pipeline
+- [ ] Add unit and integration tests
