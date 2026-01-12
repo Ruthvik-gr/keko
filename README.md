@@ -190,29 +190,3 @@ With custom context:
 2. **No Rate Limiting** - The API does not implement rate limiting. Production deployment should add rate limiting middleware.
 
 3. **No Input Sanitization** - Basic validation exists, but comprehensive input sanitization for security is not implemented.
-
-4. **Single Database** - Uses a single MongoDB instance. Production should consider read replicas and sharding.
-
-5. **No Caching** - No Redis or caching layer. Frequent queries hit the database directly.
-
-6. **Environment Secrets** - API keys are stored in `.env` files. Production should use a secrets manager.
-
-7. **No HTTPS** - Development runs on HTTP. Production must use HTTPS.
-
-8. **No Monitoring** - No APM, logging aggregation, or alerting configured.
-
-### For Production Deployment
-
-Before deploying to production, consider:
-
-- [ ] Implement proper authentication (JWT, OAuth)
-- [ ] Add rate limiting (express-rate-limit)
-- [ ] Set up HTTPS with SSL certificates
-- [ ] Add comprehensive input validation and sanitization
-- [ ] Implement caching layer (Redis)
-- [ ] Set up monitoring and alerting (Datadog, New Relic)
-- [ ] Configure proper CORS policies
-- [ ] Add database indexing and optimization
-- [ ] Implement proper error tracking (Sentry)
-- [ ] Set up CI/CD pipeline
-- [ ] Add unit and integration tests
